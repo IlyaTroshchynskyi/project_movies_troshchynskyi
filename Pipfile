@@ -9,6 +9,8 @@ flask-migrate = "*"
 sqlalchemy = "*"
 psycopg2-binary = "*"
 pylint = "*"
+flask-restx = "*"
+marshmallow-sqlalchemy = "*"
 
 [dev-packages]
 
