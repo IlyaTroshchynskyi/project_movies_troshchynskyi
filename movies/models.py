@@ -1,3 +1,4 @@
+from werkzeug.security import generate_password_hash
 from movies import db
 
 
@@ -51,6 +52,14 @@ class Users(db.Model):
     password = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     films = db.relationship('Films', backref='users', lazy=True)
+
+    def __init__(self, first_name, last_name, age, email, password, is_admin=False):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.age = age
+        self.email = email
+        self.password = generate_password_hash(password)
+        self.is_admin = is_admin
 
     def __repr__(self):
         return f'User: id: {self.user_id}, first_name:{self.first_name}, is_admin: {self.is_admin}'
