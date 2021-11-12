@@ -1,5 +1,12 @@
 from werkzeug.security import generate_password_hash
+from flask_login import UserMixin
+from . import login_manager
 from movies import db
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
 
 
 films_genres = db.Table('films_genres',
@@ -39,7 +46,7 @@ class Films(db.Model):
                f' rate: {self.rate}'
 
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     """
     Table for saving users who has registered. Has relationships
     with table films one-to-many
@@ -63,6 +70,9 @@ class Users(db.Model):
 
     def __repr__(self):
         return f'User: id: {self.user_id}, first_name:{self.first_name}, is_admin: {self.is_admin}'
+
+    def get_id(self):
+        return self.user_id
 
 
 class Directors(db.Model):
