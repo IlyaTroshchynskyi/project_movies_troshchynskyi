@@ -1,3 +1,4 @@
+from datetime import date
 from flask_restx import Resource
 from flask_login import login_required, current_user
 from . import api, db
@@ -5,7 +6,7 @@ from .models import Genres, Directors, Films
 from flask import request
 from .schemas import GenresSchemaLoad, GenresSchema, DirectorsSchemaLoad, DirectorsSchema, \
     FilmsSchema, FilmsSchemaLoad
-from .utils import parse_films_json_data
+from .utils import parse_films_json_data, define_filter_by_directors, define_filter_by_genre
 
 genres_schema_load = GenresSchemaLoad()
 genres_schema = GenresSchema()
@@ -103,7 +104,28 @@ class GenresListApi(Resource):
 class FilmsListApi(Resource):
 
     def get(self):
-        films = Films.query.all()
+        try:
+            page = request.args.get('page', 1, type=int)
+        except ValueError:
+            page = 1
+
+        genre = define_filter_by_genre(request.args)
+        director = define_filter_by_directors(request.args)
+
+        start_date = request.args.get('start_date', date(1971, 1, 1))
+        end_date = request.args.get('end_date', date(9999, 12, 31))
+
+        rate_start = 0
+        rate_end = 10
+        if request.args.get('rate'):
+            rate_start = rate_end = request.args.get('rate')
+
+        films = Films.query.join(Films.genres).filter(Genres.genre_name.in_(genre)).\
+            filter(Films.release_date.between(start_date, end_date)).join(Films.directors).\
+            filter(Directors.last_name.in_(director)).\
+            filter(Films.rate.between(rate_start, rate_end)).\
+            paginate(page=page, per_page=10).items
+
         return films_schema.dump(films, many=True)
 
     @login_required
@@ -121,7 +143,7 @@ class FilmsListApi(Resource):
 
 
 @api.route('/films/<film_id>')
-class GenresListApi(Resource):
+class FilmApi(Resource):
     def get(self, film_id):
         film = Films.query.filter_by(film_id=film_id).first()
         if film is None:
