@@ -2,3 +2,4 @@
 __pycache__/
 migrations
 movies/movies.db
+movies/insert_data.py
