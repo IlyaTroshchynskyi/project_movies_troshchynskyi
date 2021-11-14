@@ -2,7 +2,7 @@ from . import db
 from .models import Genres, Directors
 
 
-def parse_films_json_data(data):
+def parse_films_json(data):
     film_title = data.get('film_title')
     release_date = data.get('release_date')
     description = data.get('description')
@@ -13,7 +13,7 @@ def parse_films_json_data(data):
     return input_
 
 
-def define_filter_by_genre(data):
+def filter_by_genre(data):
     genres = []
     for gen in db.session.query().with_entities(Genres.genre_name).all():
         genres.append(gen[0])
@@ -24,7 +24,7 @@ def define_filter_by_genre(data):
     return genre
 
 
-def define_filter_by_directors(data):
+def filter_by_directors(data):
     directors = []
 
     for director_last_name in db.session.query().with_entities(Directors.last_name).all():
@@ -35,3 +35,20 @@ def define_filter_by_directors(data):
         director = [data.get('director')]
 
     return director
+
+
+def update_directors(data):
+    directors = []
+    for director in data.get('directors'):
+        if Directors.query.filter_by(last_name=director.get('last_name', '')).first():
+            directors.append(Directors.query.filter_by(last_name=director.get('last_name')).first())
+    return directors
+
+
+def update_genres(data):
+    genres = []
+    for genre in data.get('genres'):
+        if Genres.query.filter_by(genre_name=genre.get('genre_name', '')).first():
+            genres.append(Genres.query.filter_by(genre_name=genre.get('genre_name')).first())
+
+    return genres
