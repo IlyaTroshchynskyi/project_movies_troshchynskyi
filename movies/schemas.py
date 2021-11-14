@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from .models import Genres, Directors, Films, Users
 from marshmallow_sqlalchemy.fields import Nested
@@ -47,3 +48,76 @@ class UserSchema(SQLAlchemyAutoSchema):
         model = Users
         load_instance = True
         load_only = ('password',)
+
+
+class ValidateSchemas:
+
+    @staticmethod
+    def validate_genre(data):
+        errors = []
+        try:
+            if 100 < len(data.get('genre_name', '')) or len(data.get('genre_name', '')) < 3:
+                errors.append('Length should be between 3 and 100 characters')
+            if data.get('genre_name', '').isdigit():
+                errors.append('The genre should be string')
+        except Exception as ex:
+            print('Will be logger')
+        return errors
+
+    @staticmethod
+    def validate_director(data):
+        errors = []
+
+        try:
+            if 100 < len(data.get('first_name', '')) or len(data.get('first_name', '')) < 3:
+                errors.append('Length first name should be between 3 and 100 characters')
+            if data.get('first_name', '').isdigit():
+                errors.append('The first name should be string')
+
+            if 100 < len(data.get('last_name', '')) or len(data.get('last_name', '')) < 3:
+                errors.append('Length last name should be between 3 and 100 characters')
+            if data.get('last_name', '').isdigit():
+                errors.append('The last name should be string')
+
+            if str(data.get('age', 0)).isalpha():
+                errors.append('Age should be float')
+            if data.get('age', 0) > 18:
+                errors.append('The age should be more than 17')
+
+        except Exception as ex:
+            print('Will be logger')
+        return errors
+
+    @staticmethod
+    def validate_films(data):
+        errors = []
+
+        try:
+            if 100 < len(data.get('film_title', '')) or len(data.get('film_title', '')) < 3:
+                errors.append('Length film title should be between 3 and 100 characters')
+            if data.get('film_title', '').isdigit():
+                errors.append('The film title should be string')
+            default = datetime.strptime('1970-01-01', '%Y-%m-%d')
+
+            if datetime.strptime(data.get('release_date', default), '%Y-%m-%d') \
+                    < datetime.strptime('1971-01-01', '%Y-%m-%d'):
+                errors.append('Release data should be more than 1971-01-01')
+
+            if str(data.get('rate', '')).isalpha():
+                errors.append('The rate should be float')
+
+            if data.get('rate', 0) >= 0 or data.get('rate', 0) <= 10:
+                errors.append('Rate should be between 0 and 10')
+
+            for item in data.get('genres'):
+                nested_error = ValidateSchemas.validate_genre(item)
+                if nested_error:
+                    errors.extend(nested_error)
+
+            for item in data.get('directors'):
+                nested_error = ValidateSchemas.validate_director(item)
+                if nested_error:
+                    errors.extend(nested_error)
+        except Exception as ex:
+            print('Will be logger')
+        return errors
