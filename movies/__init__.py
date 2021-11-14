@@ -12,7 +12,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///movies.db'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-api = Api(app)
+api = Api(app, version='1.0', title='Films API', description='A simple Films API',)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
