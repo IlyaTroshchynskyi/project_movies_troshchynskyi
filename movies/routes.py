@@ -1,11 +1,11 @@
 from datetime import date
-from flask import request
+from flask import request, abort
 from flask_restx import Resource, fields
 from flask_login import login_required, current_user
 from . import api, db
 from .models import Genres, Directors, Films
 from .schemas import GenresSchemaLoad, GenresSchema, DirectorsSchemaLoad, DirectorsSchema, \
-    FilmsSchema, FilmsSchemaLoad
+    FilmsSchema, FilmsSchemaLoad, ValidateSchemas
 from .utils import parse_films_json, filter_by_directors, filter_by_genre, \
     update_directors, update_genres
 
@@ -59,6 +59,10 @@ class GenresListApi(Resource):
         """
         Create a new genre
         """
+        errors = ValidateSchemas.validate_genre(request.json)
+        if errors:
+            return abort(400, {'errors': errors})
+
         genre = genres_schema_load.load(request.json, session=db.session)
         db.session.add(genre)
         db.session.commit()
@@ -85,6 +89,10 @@ class GenresApi(Resource):
         """
         Update genre given its identifier
         """
+        errors = ValidateSchemas.validate_genre(request.json)
+        if errors:
+            return abort(400, {'errors': errors})
+
         genre = Genres.query.filter_by(genre_id=genre_id).first()
         if genre is None:
             return {'message': "Genre not found"}, 404
@@ -124,6 +132,10 @@ class DirectorsListApi(Resource):
         """
         Create a new director
         """
+        errors = ValidateSchemas.validate_director(request.json)
+        if errors:
+            return abort(400, {'errors': errors})
+
         director = directors_schema_load.load(request.json, session=db.session)
         db.session.add(director)
         db.session.commit()
@@ -150,9 +162,14 @@ class DirectorsApi(Resource):
         """
         Update director given its identifier
         """
+        errors = ValidateSchemas.validate_director(request.json)
+        if errors:
+            return abort(400, {'errors': errors})
+
         director = Directors.query.filter_by(director_id=director_id).first()
         if director is None:
             return {'message': "Director not found"}, 404
+
         director = directors_schema_load.load(request.json, instance=director, session=db.session)
         db.session.add(director)
         db.session.commit()
@@ -216,6 +233,10 @@ class FilmsListApi(Resource):
         """
         Create a new film
         """
+        errors = ValidateSchemas.validate_films(request.json)
+        if errors:
+            return abort(400, {'errors': errors})
+
         input_ = parse_films_json(request.json)
         film = films_schema_load.load(input_, session=db.session, transient=True)
 
@@ -247,6 +268,10 @@ class FilmApi(Resource):
         """
         Update film given its identifier
         """
+        errors = ValidateSchemas.validate_films(request.json)
+        if errors:
+            return abort(400, {'errors': errors})
+
         film = Films.query.filter_by(film_id=film_id).first()
         if film is None:
             return {'message': "Film not found"}, 404
