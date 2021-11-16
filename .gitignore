@@ -3,3 +3,4 @@ __pycache__/
 migrations
 movies/movies.db
 movies/insert_data.py
+movies/logs/movies.log

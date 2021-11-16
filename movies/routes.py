@@ -1,4 +1,5 @@
 from datetime import date
+import logging
 from flask import request, abort
 from flask_restx import Resource, fields
 from flask_login import login_required, current_user
@@ -8,6 +9,8 @@ from .schemas import GenresSchemaLoad, GenresSchema, DirectorsSchemaLoad, Direct
     FilmsSchema, FilmsSchemaLoad, ValidateSchemas
 from .utils import parse_films_json, filter_by_directors, filter_by_genre, \
     update_directors, update_genres
+
+logger = logging.getLogger('movies.routes')
 
 genres_schema_load = GenresSchemaLoad()
 genres_schema = GenresSchema()
@@ -50,6 +53,7 @@ class GenresListApi(Resource):
         Fetch list all genres
         """
         genres = Genres.query.all()
+        logger.info(f'User: {current_user} fetched list all genres: {genres}')
         return genres_schema.dump(genres, many=True)
 
     @api.expect(genres_model)
@@ -61,11 +65,13 @@ class GenresListApi(Resource):
         """
         errors = ValidateSchemas.validate_genre(request.json)
         if errors:
+            logger.error(f'User: {current_user} entered wrong data {errors} for updating genre')
             return abort(400, {'errors': errors})
 
         genre = genres_schema_load.load(request.json, session=db.session)
         db.session.add(genre)
         db.session.commit()
+        logger.info(f'User: {current_user} has created new genre: {genre}')
         return genres_schema.dump(genre)
 
 
@@ -79,7 +85,9 @@ class GenresApi(Resource):
         """
         genre = Genres.query.filter_by(genre_id=genre_id).first()
         if genre is None:
-            return {'message': "Genre not found"}, 404
+            logger.error(f'User: {current_user} entered non-existent genre id: {genre_id}')
+            return abort(404, 'Genre not found')
+        logger.info(f'User: {current_user} fetched {genre}')
         return genres_schema.dump(genre)
 
     @api.expect(genres_model)
@@ -91,14 +99,17 @@ class GenresApi(Resource):
         """
         errors = ValidateSchemas.validate_genre(request.json)
         if errors:
+            logger.error(f'User: {current_user} entered wrong data {errors} for updating genre')
             return abort(400, {'errors': errors})
 
         genre = Genres.query.filter_by(genre_id=genre_id).first()
         if genre is None:
-            return {'message': "Genre not found"}, 404
+            logger.error(f'User: {current_user} entered non-existent genre id: {genre_id}')
+            return abort(404, 'Genre not found')
         genre = genres_schema_load.load(request.json, instance=genre, session=db.session)
         db.session.add(genre)
         db.session.commit()
+        logger.info(f'User: {current_user} updated {genre}')
         return genres_schema.dump(genre)
 
     @login_required
@@ -108,9 +119,11 @@ class GenresApi(Resource):
         """
         genre = Genres.query.filter_by(genre_id=genre_id).first()
         if genre is None:
-            return {'message': "Genre not found"}, 404
+            logger.error(f'User: {current_user} entered non-existent genre id: {genre_id}')
+            return abort(404, "Genre not found")
         db.session.delete(genre)
         db.session.commit()
+        logger.info(f'User: {current_user} deleted {genre}')
         return {}, 204
 
 
@@ -123,6 +136,7 @@ class DirectorsListApi(Resource):
         Fetch list of directors
         """
         directors = Directors.query.all()
+        logger.info(f'User: {current_user} fetched list all directors: {directors}')
         return directors_schema.dump(directors, many=True)
 
     @api.expect(directors_model)
@@ -134,11 +148,13 @@ class DirectorsListApi(Resource):
         """
         errors = ValidateSchemas.validate_director(request.json)
         if errors:
+            logger.error(f'User: {current_user} entered wrong data {errors} for creating director')
             return abort(400, {'errors': errors})
 
         director = directors_schema_load.load(request.json, session=db.session)
         db.session.add(director)
         db.session.commit()
+        logger.info(f'User: {current_user} has created a new director: {director}')
         return directors_schema.dump(director)
 
 
@@ -152,7 +168,9 @@ class DirectorsApi(Resource):
         """
         director = Directors.query.filter_by(director_id=director_id).first()
         if director is None:
-            return {'message': "Director not found"}, 404
+            logger.error(f'User: {current_user} entered non-existent director id: {director_id}')
+            return abort(404, "Director not found")
+        logger.info(f'User: {current_user} fetched {director}')
         return directors_schema.dump(director)
 
     @api.expect(directors_model)
@@ -164,15 +182,18 @@ class DirectorsApi(Resource):
         """
         errors = ValidateSchemas.validate_director(request.json)
         if errors:
+            logger.error(f'User: {current_user} entered wrong data {errors} for updating director')
             return abort(400, {'errors': errors})
 
         director = Directors.query.filter_by(director_id=director_id).first()
         if director is None:
-            return {'message': "Director not found"}, 404
+            logger.error(f'User: {current_user} entered non-existent director id: {director_id}')
+            return abort(404, "Director not found")
 
         director = directors_schema_load.load(request.json, instance=director, session=db.session)
         db.session.add(director)
         db.session.commit()
+        logger.info(f'User: {current_user} updated {director}')
         return directors_schema.dump(director)
 
     @login_required
@@ -182,9 +203,11 @@ class DirectorsApi(Resource):
         """
         director = Directors.query.filter_by(director_id=director_id).first()
         if director is None:
-            return {'message': "Director not found"}, 404
+            logger.error(f'User: {current_user} entered non-existent director id: {director_id}')
+            return abort(404, "Director not found")
         db.session.delete(director)
         db.session.commit()
+        logger.info(f'User: {current_user} deleted {director}')
         return {}, 204
 
 
@@ -233,7 +256,7 @@ class FilmsListApi(Resource):
                 filter(Films.release_date.between(start_date, end_date)).join(Films.directors).\
                 filter(Directors.last_name.in_(director)).\
                 filter(Films.rate.between(rate_start, rate_end))
-
+        logger.info(f'User: {current_user} fetched films: {films}')
         return films_schema.dump(films.paginate(page=page, per_page=10).items, many=True)
 
     @api.expect(films_model)
@@ -245,6 +268,7 @@ class FilmsListApi(Resource):
         """
         errors = ValidateSchemas.validate_films(request.json)
         if errors:
+            logger.error(f'User: {current_user} entered wrong data {errors} for creating film')
             return abort(400, {'errors': errors})
 
         input_ = parse_films_json(request.json)
@@ -255,6 +279,7 @@ class FilmsListApi(Resource):
         film.users = current_user
         db.session.add(film)
         db.session.commit()
+        logger.info(f'User: {current_user} has created a new film: {film}')
         return films_schema.dump(film)
 
 
@@ -268,7 +293,10 @@ class FilmApi(Resource):
         """
         film = Films.query.filter_by(film_id=film_id).first()
         if film is None:
-            return {'message': "Film not found"}, 404
+            logger.error(f'User: {current_user} entered non-existent film id: {film_id}')
+            return abort(404, "Film not found")
+
+        logger.info(f'User: {current_user} fetched {film}')
         return films_schema.dump(film)
 
     @api.expect(films_model)
@@ -280,11 +308,14 @@ class FilmApi(Resource):
         """
         errors = ValidateSchemas.validate_films(request.json)
         if errors:
+            logger.error(f'User: {current_user} entered wrong data {errors} for updating film')
             return abort(400, {'errors': errors})
 
         film = Films.query.filter_by(film_id=film_id).first()
         if film is None:
-            return {'message': "Film not found"}, 404
+            logger.error(f'User: {current_user} entered non-existent film id: {film_id}')
+            return abort(404, "Film not found")
+
         film = films_schema_load.load(parse_films_json(request.json),
                                       instance=film, session=db.session)
 
@@ -292,6 +323,7 @@ class FilmApi(Resource):
         film.genres = update_genres(request.json)
         db.session.add(film)
         db.session.commit()
+        logger.info(f'User: {current_user} updated {film}')
         return films_schema.dump(film)
 
     @login_required
@@ -301,7 +333,10 @@ class FilmApi(Resource):
         """
         film = Films.query.filter_by(film_id=film_id).first()
         if film is None:
-            return {'message': "Film not found"}, 404
+            logger.error(f'User: {current_user} entered non-existent film id: {film_id}')
+            return abort(404, "Film not found")
+
         db.session.delete(film)
         db.session.commit()
+        logger.info(f'User: {current_user} deleted {film}')
         return {}, 204

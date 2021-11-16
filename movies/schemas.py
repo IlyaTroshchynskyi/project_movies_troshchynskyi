@@ -1,8 +1,12 @@
+import logging
 from datetime import datetime
 import re
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from .models import Genres, Directors, Films, Users
 from marshmallow_sqlalchemy.fields import Nested
+
+
+logger = logging.getLogger('movies.schemas')
 
 
 class GenresSchemaLoad(SQLAlchemyAutoSchema):
@@ -62,7 +66,7 @@ class ValidateSchemas:
             if data.get('genre_name', '').isdigit():
                 errors.append('The genre should be string')
         except Exception as ex:
-            print('Will be logger')
+            logger.error(ex)
         return errors
 
     @staticmethod
@@ -88,7 +92,7 @@ class ValidateSchemas:
                 errors.append('The age should be numeric not float')
 
         except Exception as ex:
-            print('Will be logger')
+            logger.error(ex)
         return errors
 
     @staticmethod
@@ -122,7 +126,7 @@ class ValidateSchemas:
                 if nested_error:
                     errors.extend(nested_error)
         except Exception as ex:
-            print('Will be logger')
+            logger.error(ex)
         return errors
 
     @staticmethod
@@ -159,5 +163,5 @@ class ValidateSchemas:
                               " has a number in it, has a capital letter in it")
 
         except Exception as ex:
-            print('Will be logger')
+            logger.error(ex)
         return errors
