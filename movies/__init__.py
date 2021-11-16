@@ -10,6 +10,7 @@ app.config['SECRET_KEY'] = 'secret'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1@localhost:5432/dbname'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///movies.db'
+app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 api = Api(app, version='1.0', title='Films API', description='A simple Films API',)
