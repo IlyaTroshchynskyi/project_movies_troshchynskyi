@@ -191,24 +191,32 @@ class DirectorsApi(Resource):
 @api.route('/films')
 class FilmsListApi(Resource):
 
+    @api.param('search', 'Search the film by partial or full coincidence. Case sensitive')
     @api.param('page', 'Number of page. Max per page 10 records')
     @api.param('start_date', 'Start date for filtering')
     @api.param('end_date', 'End date for filtering')
     @api.param('genre', 'Genre for filtering')
     @api.param('director', 'Director last name for filtering')
     @api.param('rate', 'Rate for filtering')
-    @api.marshal_with(films_model, as_list=True, code=200)
+    @api.marshal_with(films_model, code=200)
     def get(self):
         """
         Fetch list of films
         """
+
+        key_query = {'start_date', 'end_date', 'rate', 'genre', 'directors'}
         try:
             page = request.args.get('page', 1, type=int)
         except ValueError:
             page = 1
 
-        genre = filter_by_genre(request.args)
-        director = filter_by_directors(request.args)
+        if request.args.get('search', ''):
+            films = Films.query.filter(Films.film_title.contains(request.args.get('search')))
+
+        args = set(request.args.keys())
+        args.discard('page')
+        if not args:
+            films = Films.query
 
         start_date = request.args.get('start_date', date(1971, 1, 1))
         end_date = request.args.get('end_date', date(9999, 12, 31))
@@ -218,13 +226,15 @@ class FilmsListApi(Resource):
         if request.args.get('rate'):
             rate_start = rate_end = request.args.get('rate')
 
-        films = Films.query.join(Films.genres).filter(Genres.genre_name.in_(genre)).\
-            filter(Films.release_date.between(start_date, end_date)).join(Films.directors).\
-            filter(Directors.last_name.in_(director)).\
-            filter(Films.rate.between(rate_start, rate_end)).\
-            paginate(page=page, per_page=10).items
+        if key_query.intersection(set(request.args.keys())):
+            genre = filter_by_genre(request.args)
+            director = filter_by_directors(request.args)
+            films = Films.query.join(Films.genres).filter(Genres.genre_name.in_(genre)).\
+                filter(Films.release_date.between(start_date, end_date)).join(Films.directors).\
+                filter(Directors.last_name.in_(director)).\
+                filter(Films.rate.between(rate_start, rate_end))
 
-        return films_schema.dump(films, many=True)
+        return films_schema.dump(films.paginate(page=page, per_page=10).items, many=True)
 
     @api.expect(films_model)
     @api.marshal_with(films_model, code=200)

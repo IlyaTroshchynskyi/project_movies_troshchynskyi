@@ -1,4 +1,5 @@
-from datetime import date, datetime
+from datetime import datetime
+import re
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from .models import Genres, Directors, Films, Users
 from marshmallow_sqlalchemy.fields import Nested
@@ -81,8 +82,10 @@ class ValidateSchemas:
 
             if str(data.get('age', 0)).isalpha():
                 errors.append('Age should be float')
-            if data.get('age', 0) > 18:
+            if data.get('age', 0) > 17:
                 errors.append('The age should be more than 17')
+            if str(data.get('age', '')).find('.') != -1:
+                errors.append('The age should be numeric not float')
 
         except Exception as ex:
             print('Will be logger')
@@ -118,6 +121,43 @@ class ValidateSchemas:
                 nested_error = ValidateSchemas.validate_director(item)
                 if nested_error:
                     errors.extend(nested_error)
+        except Exception as ex:
+            print('Will be logger')
+        return errors
+
+    @staticmethod
+    def validate_user(data):
+        errors = []
+
+        try:
+            if 100 < len(data.get('first_name', '')) or len(data.get('first_name', '')) < 3:
+                errors.append('Length first name should be between 3 and 100 characters')
+            if data.get('first_name', '').isdigit():
+                errors.append('The first name should be string')
+
+            if 100 < len(data.get('last_name', '')) or len(data.get('last_name', '')) < 3:
+                errors.append('Length last name should be between 3 and 100 characters')
+            if data.get('last_name', '').isdigit():
+                errors.append('The last name should be string')
+
+            if str(data.get('age', 0)).isalpha():
+                errors.append('Age should be float')
+
+            if data.get('age', 0) > 11:
+                errors.append('The age should be more than 11')
+
+            if str(data.get('age', '')).find('.') != -1:
+                errors.append('The age should be numeric not float')
+
+            regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+            if not re.fullmatch(regex, data.get('email', '')):
+                errors.append('Invalid email')
+            password = data.get('password', '')
+            if len(password) < 8 or re.search('[0-9]', password) is None or \
+                    re.search('[A-Z]', password) is None:
+                errors.append("Make sure your password is at lest 8 letters,"
+                              " has a number in it, has a capital letter in it")
+
         except Exception as ex:
             print('Will be logger')
         return errors

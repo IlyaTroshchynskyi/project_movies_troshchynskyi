@@ -1,9 +1,9 @@
-from flask import request
+from flask import request, abort
 from flask_restx import Resource, fields
 from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash
 from . import api, db
-from .schemas import UserSchema
+from .schemas import UserSchema, ValidateSchemas
 from .models import Users
 
 user_schema = UserSchema()
@@ -12,7 +12,7 @@ users_model = api.model('Users', {
     'user_id': fields.Integer(readonly=True),
     'first_name': fields.String(required=True),
     'last_name': fields.String(required=True),
-    'age': fields.Float(required=True),
+    'age': fields.Integer(required=True),
     'email': fields.String(required=True),
     'password': fields.String(required=True),
     'is_admin': fields.Boolean(required=True),
@@ -42,6 +42,10 @@ class UsersApi(Resource):
         Create a new user
         """
 
+        errors = ValidateSchemas.validate_user(request.json)
+        if errors:
+            return abort(400, {'errors': errors})
+
         user = Users.query.filter_by(email=request.json.get("email")).first()
         if user:
             return {"message": f"User with email: {request.json.get('email')} exist"}
@@ -60,6 +64,10 @@ class UserApi(Resource):
         """
         Update user's data
         """
+        errors = ValidateSchemas.validate_user(request.json)
+        if errors:
+            return abort(400, {'errors': errors})
+
         user = Users.query.filter_by(email=email).first()
         if user is None:
             return {"message": f"User with email: {email} not found"}, 404
