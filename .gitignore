@@ -4,3 +4,5 @@ migrations
 movies/movies.db
 movies/insert_data.py
 movies/logs/movies.log
+.pytest_cache
+movies/:memory:testing.db

@@ -10,6 +10,7 @@ from .schemas import GenresSchemaLoad, GenresSchema, DirectorsSchemaLoad, Direct
 from .utils import parse_films_json, filter_by_directors, filter_by_genre, \
     update_directors, update_genres
 
+
 logger = logging.getLogger('movies.routes')
 
 genres_schema_load = GenresSchemaLoad()
@@ -65,14 +66,14 @@ class GenresListApi(Resource):
         """
         errors = ValidateSchemas.validate_genre(request.json)
         if errors:
-            logger.error(f'User: {current_user} entered wrong data {errors} for updating genre')
+            logger.error(f'User: {current_user} entered wrong data {errors} for creating genre')
             return abort(400, {'errors': errors})
 
         genre = genres_schema_load.load(request.json, session=db.session)
         db.session.add(genre)
         db.session.commit()
         logger.info(f'User: {current_user} has created new genre: {genre}')
-        return genres_schema.dump(genre)
+        return genres_schema.dump(genre), 201
 
 
 @api.route('/genres/<genre_id>')
@@ -140,7 +141,7 @@ class DirectorsListApi(Resource):
         return directors_schema.dump(directors, many=True)
 
     @api.expect(directors_model)
-    @api.marshal_with(directors_model, as_list=True)
+    @api.marshal_with(directors_model, code=201)
     @login_required
     def post(self):
         """
@@ -155,7 +156,7 @@ class DirectorsListApi(Resource):
         db.session.add(director)
         db.session.commit()
         logger.info(f'User: {current_user} has created a new director: {director}')
-        return directors_schema.dump(director)
+        return directors_schema.dump(director), 201
 
 
 @api.route('/directors/<director_id>')
