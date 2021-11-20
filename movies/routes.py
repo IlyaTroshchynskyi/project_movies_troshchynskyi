@@ -175,7 +175,7 @@ class DirectorsApi(Resource):
         return directors_schema.dump(director)
 
     @api.expect(directors_model)
-    @api.marshal_with(directors_model, as_list=True)
+    @api.marshal_with(directors_model, as_list=True, code=200)
     @login_required
     def put(self, director_id):
         """
@@ -195,7 +195,7 @@ class DirectorsApi(Resource):
         db.session.add(director)
         db.session.commit()
         logger.info(f'User: {current_user} updated {director}')
-        return directors_schema.dump(director)
+        return directors_schema.dump(director), 200
 
     @login_required
     def delete(self, director_id):
@@ -228,7 +228,7 @@ class FilmsListApi(Resource):
         Fetch list of films
         """
 
-        key_query = {'start_date', 'end_date', 'rate', 'genre', 'directors'}
+        key_query = {'start_date', 'end_date', 'rate', 'genre', 'director'}
         try:
             page = request.args.get('page', 1, type=int)
         except ValueError:
@@ -261,7 +261,7 @@ class FilmsListApi(Resource):
         return films_schema.dump(films.paginate(page=page, per_page=10).items, many=True)
 
     @api.expect(films_model)
-    @api.marshal_with(films_model, code=200)
+    @api.marshal_with(films_model, code=201)
     @login_required
     def post(self):
         """
@@ -281,7 +281,7 @@ class FilmsListApi(Resource):
         db.session.add(film)
         db.session.commit()
         logger.info(f'User: {current_user} has created a new film: {film}')
-        return films_schema.dump(film)
+        return films_schema.dump(film), 201
 
 
 @api.route('/films/<film_id>')
@@ -325,7 +325,7 @@ class FilmApi(Resource):
         db.session.add(film)
         db.session.commit()
         logger.info(f'User: {current_user} updated {film}')
-        return films_schema.dump(film)
+        return films_schema.dump(film), 200
 
     @login_required
     def delete(self, film_id):

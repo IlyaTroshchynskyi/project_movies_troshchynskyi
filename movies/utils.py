@@ -39,7 +39,7 @@ def filter_by_directors(data):
 
 def update_directors(data):
     directors = []
-    for director in data.get('directors'):
+    for director in data.get('directors', []):
         if Directors.query.filter_by(last_name=director.get('last_name', '')).first():
             directors.append(Directors.query.filter_by(last_name=director.get('last_name')).first())
     return directors
@@ -47,7 +47,7 @@ def update_directors(data):
 
 def update_genres(data):
     genres = []
-    for genre in data.get('genres'):
+    for genre in data.get('genres', []):
         if Genres.query.filter_by(genre_name=genre.get('genre_name', '')).first():
             genres.append(Genres.query.filter_by(genre_name=genre.get('genre_name')).first())
 

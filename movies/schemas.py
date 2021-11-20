@@ -58,35 +58,45 @@ class UserSchema(SQLAlchemyAutoSchema):
 class ValidateSchemas:
 
     @staticmethod
-    def validate_genre(data):
+    def validate_first_last_name_or_genre_length(data):
+        if 100 < len(str(data)) or len(str(data)) < 3:
+            return True
+
+    @staticmethod
+    def validate_first_last_name_or_genre_string(data):
+        if re.search('[0-9]', str(data)):
+            return True
+
+    @classmethod
+    def validate_genre(cls, data):
         errors = []
         try:
-            if 100 < len(data.get('genre_name', '')) or len(data.get('genre_name', '')) < 3:
+            if cls.validate_first_last_name_or_genre_length(data.get("genre_name", '')):
                 errors.append('Length should be between 3 and 100 characters')
-            if data.get('genre_name', '').isdigit():
+            if cls.validate_first_last_name_or_genre_string(data.get("genre_name", '')):
                 errors.append('The genre should be string')
         except Exception as ex:
             logger.error(ex)
         return errors
 
-    @staticmethod
-    def validate_director(data):
+    @classmethod
+    def validate_director(cls, data):
         errors = []
 
         try:
-            if 100 < len(data.get('first_name', '')) or len(data.get('first_name', '')) < 3:
+            if cls.validate_first_last_name_or_genre_length(data.get('first_name', '')):
                 errors.append('Length first name should be between 3 and 100 characters')
-            if data.get('first_name', '').isdigit():
+            if cls.validate_first_last_name_or_genre_string(data.get('first_name', '')):
                 errors.append('The first name should be string')
 
-            if 100 < len(data.get('last_name', '')) or len(data.get('last_name', '')) < 3:
+            if cls.validate_first_last_name_or_genre_length(data.get('last_name', '')):
                 errors.append('Length last name should be between 3 and 100 characters')
-            if data.get('last_name', '').isdigit():
+            if cls.validate_first_last_name_or_genre_string(data.get('last_name', '')):
                 errors.append('The last name should be string')
 
-            if str(data.get('age', 0)).isalpha():
-                errors.append('Age should be float')
-            if data.get('age', 0) < 17:
+            if re.search('[A-Za-z]', str(data.get('age', ''))):
+                errors.append('Age should be numeric')
+            if data.get('age', 0) < 18:
                 errors.append('The age should be more than 17')
             if str(data.get('age', '')).find('.') != -1:
                 errors.append('The age should be numeric not float')
@@ -110,10 +120,11 @@ class ValidateSchemas:
                     < datetime.strptime('1971-01-01', '%Y-%m-%d'):
                 errors.append('Release data should be more than 1971-01-01')
 
-            if str(data.get('rate', '')).isalpha():
+            if re.search('[A-Za-z]', str(data.get('rate', 'F'))) or \
+                    not str(data.get('rate', '')).find('.') != -1:
                 errors.append('The rate should be float')
 
-            if data.get('rate', 0) >= 0 or data.get('rate', 0) <= 10:
+            if data.get('rate', 0) < 0 or data.get('rate', 0) > 10:
                 errors.append('Rate should be between 0 and 10')
 
             for item in data.get('genres'):
@@ -129,25 +140,25 @@ class ValidateSchemas:
             logger.error(ex)
         return errors
 
-    @staticmethod
-    def validate_user(data):
+    @classmethod
+    def validate_user(cls, data):
         errors = []
 
         try:
-            if 100 < len(data.get('first_name', '')) or len(data.get('first_name', '')) < 3:
+            if cls.validate_first_last_name_or_genre_length(data.get('first_name', '')):
                 errors.append('Length first name should be between 3 and 100 characters')
-            if data.get('first_name', '').isdigit():
+            if cls.validate_first_last_name_or_genre_string(data.get("first_name", '')):
                 errors.append('The first name should be string')
 
-            if 100 < len(data.get('last_name', '')) or len(data.get('last_name', '')) < 3:
+            if cls.validate_first_last_name_or_genre_length(data.get('last_name', '')):
                 errors.append('Length last name should be between 3 and 100 characters')
-            if data.get('last_name', '').isdigit():
+            if cls.validate_first_last_name_or_genre_string(data.get('last_name', '')):
                 errors.append('The last name should be string')
 
-            if str(data.get('age', 0)).isalpha():
-                errors.append('Age should be float')
+            if re.search('[A-Za-z]', str(data.get('age', ''))):
+                errors.append('Age should be numeric')
 
-            if data.get('age', 0) < 11:
+            if data.get('age', 0) < 12:
                 errors.append('The age should be more than 11')
 
             if str(data.get('age', '')).find('.') != -1:

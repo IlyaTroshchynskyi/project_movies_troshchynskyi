@@ -67,7 +67,7 @@ class UsersApi(Resource):
 class UserApi(Resource):
 
     @api.expect(users_model)
-    @api.marshal_with(users_model, 200)
+    @api.marshal_with(users_model, code=200)
     def put(self, email):
         """
         Update user's data
