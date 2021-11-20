@@ -35,3 +35,12 @@ class Configuration:
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1@localhost:5432/dbname'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///movies.db'
     SQLALCHEMY_ECHO = True
+
+
+class TestConfiguration(Configuration):
+    """
+    Configuration for tests
+    """
+
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:testing.db'

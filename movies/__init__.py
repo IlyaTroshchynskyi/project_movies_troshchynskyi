@@ -3,32 +3,43 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restx import Api
-from flask_login import LoginManager
-from .config import Configuration, init_logger
+from flask_login import LoginManager, AnonymousUserMixin
+from .config import init_logger
 
 
-class MyAnonymousUser:
+class MyAnonymousUser(AnonymousUserMixin):
 
-    @staticmethod
-    def is_authenticated(self):
-        return False
+    def __init__(self):
+        self.email = ''
 
     def __repr__(self):
         return f'Anonymous user'
 
 
-app = Flask(__name__)
-app.config.from_object(Configuration)
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-api = Api(app, version='1.0', title='Films API', description='A simple Films API',)
+db = SQLAlchemy()
+migrate = Migrate()
+api = Api(version='1.0', title='Films API', description='A simple Films API',)
 login_manager = LoginManager()
 
 login_manager.anonymous_user = MyAnonymousUser
-login_manager.init_app(app)
-init_logger('movies')
-logger = logging.getLogger("movies.__init__")
 
-from . import models
-from . import routes
-from . import users
+
+def create_app(configuration):
+
+    init_logger('movies')
+    app = Flask(__name__)
+    app.config.from_object(configuration)
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+    api.init_app(app)
+
+    login_manager.init_app(app)
+    logger = logging.getLogger("movies.__init__")
+
+    from . import models
+    from . import routes
+    from . import users
+
+    logger.info('Application movies has created')
+    return app

@@ -12,6 +12,7 @@ pylint = "*"
 flask-restx = "*"
 marshmallow-sqlalchemy = "*"
 flask-login = "*"
+pytest = "*"
 
 [dev-packages]
 

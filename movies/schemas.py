@@ -86,7 +86,7 @@ class ValidateSchemas:
 
             if str(data.get('age', 0)).isalpha():
                 errors.append('Age should be float')
-            if data.get('age', 0) > 17:
+            if data.get('age', 0) < 17:
                 errors.append('The age should be more than 17')
             if str(data.get('age', '')).find('.') != -1:
                 errors.append('The age should be numeric not float')
@@ -147,7 +147,7 @@ class ValidateSchemas:
             if str(data.get('age', 0)).isalpha():
                 errors.append('Age should be float')
 
-            if data.get('age', 0) > 11:
+            if data.get('age', 0) < 11:
                 errors.append('The age should be more than 11')
 
             if str(data.get('age', '')).find('.') != -1:

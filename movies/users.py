@@ -116,6 +116,7 @@ class UserLogin(Resource):
         user = Users.query.filter_by(email=request.json.get('email')).first()
         if user and check_password_hash(user.password, request.json.get('password')):
             login_user(user, remember=True)
+            logger.info(f"User with email: {request.json.get('email')} is logged in")
             return {"message": f"User with email: {request.json.get('email')} is logged in"}
         return {"message": f"Wrong credentials"}
 
