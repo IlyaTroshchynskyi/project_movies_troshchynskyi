@@ -362,6 +362,26 @@ def test_put_film(client, auth):
         "Genre of film not equal"
 
 
+def test_put_film_not_admin(client):
+    client.post("/registration", data=json.dumps(user_1), content_type="application/json")
+    client.post("/registration", data=json.dumps(user_2), content_type="application/json")
+    client.post("/login", data=json.dumps({"email": user_1.get("email"),
+                                           "password": user_1.get("password")}),
+                content_type="application/json")
+    client.post("/directors", data=json.dumps(director_1), content_type="application/json")
+    client.post("/genres", data=json.dumps(genre_1), content_type="application/json")
+    client.post("/films", data=json.dumps(film_1), content_type="application/json")
+    client.get("/logout")
+    client.post("/login", data=json.dumps({"email": user_2.get("email"),
+                                           "password": user_2.get("password")}),
+                content_type="application/json")
+    resp = client.put("/films/1", data=json.dumps(film_2), content_type="application/json")
+    assert resp.status_code == http.HTTPStatus.FORBIDDEN, "HTTP code not equal 403"
+    assert resp.json.get("message") == f"User with email: {current_user.email} is not " \
+                                       "admin or did not create this film", \
+        "Error message are not correct"
+
+
 def test_put_film_invalid_data(client, auth):
     auth.registration()
     auth.login()
@@ -388,9 +408,42 @@ def test_delete_film_by_id(client, auth):
     assert len(client.get("/films").json) == 0, "Director not deleted"
 
 
-def test_get_users(client):
+def test_delete_film_by_id_not_admin(client):
+    client.post("/registration", data=json.dumps(user_1), content_type="application/json")
+    client.post("/registration", data=json.dumps(user_2), content_type="application/json")
+    client.post("/login", data=json.dumps({"email": user_1.get("email"),
+                                           "password": user_1.get("password")}),
+                content_type="application/json")
+    client.post("/directors", data=json.dumps(director_1), content_type="application/json")
+    client.post("/genres", data=json.dumps(genre_1), content_type="application/json")
+    client.post("/films", data=json.dumps(film_1), content_type="application/json")
+    client.get("/logout")
+    client.post("/login", data=json.dumps({"email": user_2.get("email"),
+                                           "password": user_2.get("password")}),
+                content_type="application/json")
+    resp = client.delete("/films/1")
+    assert resp.status_code == http.HTTPStatus.FORBIDDEN, "HTTP code not equal 403"
+    assert resp.json.get("message") == f"User with email: {current_user.email} is not " \
+                                       "admin or did not create this film", \
+        "Error message are not correct"
+
+
+def test_get_users(client, auth):
+    auth.registration()
+    auth.login()
     resp = client.get("/registration")
     assert resp.status_code == http.HTTPStatus.OK, "HTTP code not equal 200"
+
+
+def test_get_users_not_admin(client):
+    client.post("/registration", data=json.dumps(user_2), content_type="application/json")
+    client.post("/login", data=json.dumps({"email": user_2.get("email"),
+                                           "password": user_2.get("password")}),
+                content_type="application/json")
+    resp = client.get("/registration")
+    assert resp.status_code == http.HTTPStatus.FORBIDDEN, "HTTP code not equal 403"
+    assert resp.json.get("message") == f"User with email: {user_2.get('email')} is not admin",\
+        "Error messages are not correct"
 
 
 def test_post_create_user(client):
@@ -398,7 +451,7 @@ def test_post_create_user(client):
     resp = client.post("/registration", data=json.dumps(user_1), content_type="application/json")
     assert resp.status_code == http.HTTPStatus.CREATED, "HTTP code not equal 201"
     assert resp.json.get("first_name") == "Ilya", "User name not equal"
-    assert resp.json.get("last_name") == "Troshchynskyi", "Last name of director not equal"
+    assert resp.json.get("last_name") == "Troshchynskyi", "Last name of user not equal"
     assert resp.json.get("age") == 27, "Age of user not equal"
     assert resp.json.get("email") == "test2@mail.ru", "Email of user not equal"
     assert resp.json.get("is_admin") is True, "Is admin not equal"
@@ -421,6 +474,9 @@ def test_post_create_user_exist_email(client):
 
 def test_put_update_user(client):
     client.post("/registration", data=json.dumps(user_1), content_type="application/json")
+    client.post("/login", data=json.dumps({"email": user_1.get("email"),
+                                           "password": user_1.get("password")}),
+                content_type="application/json")
     resp = client.put("/registration/test2@mail.ru", data=json.dumps(user_2),
                       content_type="application/json")
     assert resp.status_code == http.HTTPStatus.OK, "HTTP code not equal 200"
@@ -431,8 +487,25 @@ def test_put_update_user(client):
     assert resp.json.get("is_admin") is False, "Is admin not equal"
 
 
+def test_put_update_user_not_admin(client):
+    client.post("/registration", data=json.dumps(user_2), content_type="application/json")
+    client.post("/registration", data=json.dumps(user_1), content_type="application/json")
+    client.post("/login", data=json.dumps({"email": user_2.get("email"),
+                                           "password": user_2.get("password")}),
+                content_type="application/json")
+    resp = client.put("/registration/test@mail.ru", data=json.dumps(user_2),
+                      content_type="application/json")
+    assert resp.status_code == http.HTTPStatus.FORBIDDEN, "HTTP code not equal 403"
+    assert resp.json.get("message") == f"User with email: {current_user.email} is not admin " \
+                                       f"or not current user",\
+        "Error messages are not correct"
+
+
 def test_put_user_invalid_data(client):
     client.post("/registration", data=json.dumps(user_1), content_type="application/json")
+    client.post("/login", data=json.dumps({"email": user_1.get("email"),
+                                           "password": user_1.get("password")}),
+                content_type="application/json")
     resp = client.put("/registration/test2@mail.ru", data=json.dumps(user_fail),
                       content_type="application/json")
     assert resp.status_code == http.HTTPStatus.BAD_REQUEST, "HTTP code not equal 400"
@@ -440,21 +513,30 @@ def test_put_user_invalid_data(client):
         "Error message are not correct"
 
 
-def test_put_user_not_found(client):
-    resp = client.put("/registration/test22@mail.ru", data=json.dumps(user_1),
-                      content_type="application/json")
-    assert resp.status_code == http.HTTPStatus.NOT_FOUND, "HTTP code not equal 404"
-
-
-def test_delete_user_by_email(client):
-    client.post("/registration", data=json.dumps(user_1), content_type="application/json")
-    resp = client.delete("/registration/test2@mail.ru")
+def test_delete_user_by_email(client, auth):
+    auth.registration()
+    auth.login()
+    client.post("/registration", data=json.dumps(user_2), content_type="application/json")
+    resp = client.delete("/registration/test3@mail.ru")
     assert resp.status_code == http.HTTPStatus.NO_CONTENT, "HTTP code not equal 204"
-    assert len(client.get("/registration").json) == 0, "User not deleted"
+    assert len(client.get("/registration").json) == 1, "User not deleted"
 
 
-def test_delete_user_by_email_not_found(client):
+def test_delete_user_by_email_not_admin(client):
+    client.post("/registration", data=json.dumps(user_2), content_type="application/json")
+    client.post("/login", data=json.dumps({"email": user_2.get("email"),
+                                           "password": user_2.get("password")}),
+                content_type="application/json")
     resp = client.delete("/registration/test2@mail.ru")
+    assert resp.status_code == http.HTTPStatus.FORBIDDEN, "HTTP code not equal 403"
+    assert resp.json.get("message") == f"User with email: {current_user.email} is not admin", \
+        "Error messages are not correct"
+
+
+def test_delete_user_by_email_not_found(client, auth):
+    auth.registration()
+    auth.login()
+    resp = client.delete("/registration/test3@mail.ru")
     assert resp.status_code == http.HTTPStatus.NOT_FOUND, "HTTP code not equal 404"
 
 
