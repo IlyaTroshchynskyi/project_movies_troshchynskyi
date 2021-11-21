@@ -1,5 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+   Collect all routes to films, genres and directors
+"""
+
 from datetime import date
 import logging
+from typing import Dict, List, Tuple, Union
 from flask import request, abort
 from flask_restx import Resource, fields
 from flask_login import login_required, current_user
@@ -47,20 +53,23 @@ films_model = api.model('Films', {
 
 @api.route('/genres')
 class GenresListApi(Resource):
+    """
+    Shows a list of all genres, and lets you POST to add new genre
+    """
 
     @api.marshal_with(genres_model, as_list=True, code=200)
-    def get(self):
+    def get(self) -> Tuple[Union[List[Genres], List], int]:
         """
         Fetch list all genres
         """
         genres = Genres.query.all()
         logger.info(f'User: {current_user} fetched list all genres: {genres}')
-        return genres_schema.dump(genres, many=True)
+        return genres_schema.dump(genres, many=True), 200
 
     @api.expect(genres_model)
     @api.marshal_with(genres_model, code=201)
     @login_required
-    def post(self):
+    def post(self) -> Tuple[Union[Genres, Dict], int]:
         """
         Create a new genre
         """
@@ -78,9 +87,11 @@ class GenresListApi(Resource):
 
 @api.route('/genres/<genre_id>')
 class GenresApi(Resource):
-
+    """
+    Show a single genre item and lets you delete or update them
+    """
     @api.marshal_with(genres_model, code=200)
-    def get(self, genre_id):
+    def get(self, genre_id: int) -> Tuple[Union[Genres, Dict], int]:
         """
         Fetch genre given its identifier
         """
@@ -89,12 +100,12 @@ class GenresApi(Resource):
             logger.error(f'User: {current_user} entered non-existent genre id: {genre_id}')
             return abort(404, 'Genre not found')
         logger.info(f'User: {current_user} fetched {genre}')
-        return genres_schema.dump(genre)
+        return genres_schema.dump(genre), 200
 
     @api.expect(genres_model)
     @api.marshal_with(genres_model, code=200)
     @login_required
-    def put(self, genre_id):
+    def put(self, genre_id: int) -> Tuple[Union[Genres, Dict], int]:
         """
         Update genre given its identifier
         """
@@ -114,7 +125,7 @@ class GenresApi(Resource):
         return genres_schema.dump(genre)
 
     @login_required
-    def delete(self, genre_id):
+    def delete(self, genre_id: int) -> Tuple[Dict, int]:
         """
         Delete genre given its identifier
         """
@@ -130,20 +141,22 @@ class GenresApi(Resource):
 
 @api.route('/directors')
 class DirectorsListApi(Resource):
-
+    """
+    Shows a list of all directors, and lets you POST to add new director
+    """
     @api.marshal_with(directors_model, as_list=True)
-    def get(self):
+    def get(self) -> Tuple[Union[List[Directors], List], int]:
         """
         Fetch list of directors
         """
         directors = Directors.query.all()
         logger.info(f'User: {current_user} fetched list all directors: {directors}')
-        return directors_schema.dump(directors, many=True)
+        return directors_schema.dump(directors, many=True), 200
 
     @api.expect(directors_model)
     @api.marshal_with(directors_model, code=201)
     @login_required
-    def post(self):
+    def post(self) -> Tuple[Union[Directors, Dict], int]:
         """
         Create a new director
         """
@@ -161,9 +174,11 @@ class DirectorsListApi(Resource):
 
 @api.route('/directors/<director_id>')
 class DirectorsApi(Resource):
-
+    """
+    Show a single director item and lets you delete or update them
+    """
     @api.marshal_with(directors_model, as_list=True)
-    def get(self, director_id):
+    def get(self, director_id: int) -> Tuple[Union[Directors, Dict], int]:
         """
         Fetch director given its identifier
         """
@@ -172,12 +187,12 @@ class DirectorsApi(Resource):
             logger.error(f'User: {current_user} entered non-existent director id: {director_id}')
             return abort(404, "Director not found")
         logger.info(f'User: {current_user} fetched {director}')
-        return directors_schema.dump(director)
+        return directors_schema.dump(director), 200
 
     @api.expect(directors_model)
     @api.marshal_with(directors_model, as_list=True, code=200)
     @login_required
-    def put(self, director_id):
+    def put(self, director_id: int) -> Tuple[Union[Directors, Dict], int]:
         """
         Update director given its identifier
         """
@@ -198,7 +213,7 @@ class DirectorsApi(Resource):
         return directors_schema.dump(director), 200
 
     @login_required
-    def delete(self, director_id):
+    def delete(self, director_id: int) -> Tuple[Dict, int]:
         """
         Delete director given its identifier
         """
@@ -214,6 +229,9 @@ class DirectorsApi(Resource):
 
 @api.route('/films')
 class FilmsListApi(Resource):
+    """
+    Shows a list of all films, and lets you POST to add new film
+    """
 
     @api.param('search', 'Search the film by partial or full coincidence. Case sensitive')
     @api.param('page', 'Number of page. Max per page 10 records')
@@ -223,7 +241,7 @@ class FilmsListApi(Resource):
     @api.param('director', 'Director last name for filtering')
     @api.param('rate', 'Rate for filtering')
     @api.marshal_with(films_model, code=200)
-    def get(self):
+    def get(self) -> Tuple[Union[List[Films], List], int]:
         """
         Fetch list of films
         """
@@ -263,7 +281,7 @@ class FilmsListApi(Resource):
     @api.expect(films_model)
     @api.marshal_with(films_model, code=201)
     @login_required
-    def post(self):
+    def post(self) -> Tuple[Union[Films, Dict], int]:
         """
         Create a new film
         """
@@ -286,9 +304,12 @@ class FilmsListApi(Resource):
 
 @api.route('/films/<film_id>')
 class FilmApi(Resource):
+    """
+    Show a single film item and lets you delete or update them
+    """
 
     @api.marshal_with(films_model, code=200)
-    def get(self, film_id):
+    def get(self, film_id: int) -> Tuple[Union[Films, Dict], int]:
         """
         Fetch film given its identifier
         """
@@ -298,12 +319,12 @@ class FilmApi(Resource):
             return abort(404, "Film not found")
 
         logger.info(f'User: {current_user} fetched {film}')
-        return films_schema.dump(film)
+        return films_schema.dump(film), 200
 
     @api.expect(films_model)
     @api.marshal_with(films_model, code=200)
     @login_required
-    def put(self, film_id):
+    def put(self, film_id: int) -> Tuple[Union[Directors, Dict], int]:
         """
         Update film given its identifier
         """
@@ -328,7 +349,7 @@ class FilmApi(Resource):
         return films_schema.dump(film), 200
 
     @login_required
-    def delete(self, film_id):
+    def delete(self, film_id: int) -> Tuple[Dict, int]:
         """
         Delete film given its identifier
         """

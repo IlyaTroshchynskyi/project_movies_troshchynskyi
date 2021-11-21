@@ -1,37 +1,58 @@
+# -*- coding: utf-8 -*-
+"""
+   Collect all schemas
+"""
+
 import logging
 from datetime import datetime
 import re
+from typing import Dict, Any, List
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from .models import Genres, Directors, Films, Users
 from marshmallow_sqlalchemy.fields import Nested
+from .models import Genres, Directors, Films, Users
 
 
 logger = logging.getLogger('movies.schemas')
 
 
 class GenresSchemaLoad(SQLAlchemyAutoSchema):
+    """
+     Class for loading an instance
+    """
     class Meta:
         model = Genres
         load_instance = True
 
 
 class GenresSchema(SQLAlchemyAutoSchema):
+    """
+    Class define the output
+    """
     class Meta:
         model = Genres
 
 
 class DirectorsSchemaLoad(SQLAlchemyAutoSchema):
+    """
+    Class for loading an instance
+    """
     class Meta:
         model = Directors
         load_instance = True
 
 
 class DirectorsSchema(SQLAlchemyAutoSchema):
+    """
+    Class define the output
+    """
     class Meta:
         model = Directors
 
 
 class FilmsSchemaLoad(SQLAlchemyAutoSchema):
+    """
+    Class for loading an instance
+    """
     class Meta:
         model = Films
         load_instance = True
@@ -41,6 +62,9 @@ class FilmsSchemaLoad(SQLAlchemyAutoSchema):
 
 
 class FilmsSchema(SQLAlchemyAutoSchema):
+    """
+    Class define the output
+    """
     class Meta:
         model = Films
 
@@ -49,6 +73,9 @@ class FilmsSchema(SQLAlchemyAutoSchema):
 
 
 class UserSchema(SQLAlchemyAutoSchema):
+    """
+    Class define the output
+    """
     class Meta:
         model = Users
         load_instance = True
@@ -56,19 +83,33 @@ class UserSchema(SQLAlchemyAutoSchema):
 
 
 class ValidateSchemas:
+    """
+    Schema for data validation
+    """
 
     @staticmethod
-    def validate_first_last_name_or_genre_length(data):
-        if 100 < len(str(data)) or len(str(data)) < 3:
+    def validate_first_last_name_or_genre_length(data: str) -> bool:
+        """
+        Check length of first name, last name director and user or genre name
+        """
+        if len(str(data)) > 100 or len(str(data)) < 3:
             return True
+        return False
 
     @staticmethod
-    def validate_first_last_name_or_genre_string(data):
+    def validate_first_last_name_or_genre_string(data: str) -> bool:
+        """
+        Check that first name, last name director and user or genre name don't contains numbers.
+        """
         if re.search('[0-9]', str(data)):
             return True
+        return False
 
     @classmethod
-    def validate_genre(cls, data):
+    def validate_genre(cls, data: Dict[str, Any]) -> List[str]:
+        """
+        Validate data for genre
+        """
         errors = []
         try:
             if cls.validate_first_last_name_or_genre_length(data.get("genre_name", '')):
@@ -80,7 +121,10 @@ class ValidateSchemas:
         return errors
 
     @classmethod
-    def validate_director(cls, data):
+    def validate_director(cls, data: Dict[str, Any]) -> List[str]:
+        """
+        Validate data for director
+        """
         errors = []
 
         try:
@@ -106,11 +150,14 @@ class ValidateSchemas:
         return errors
 
     @staticmethod
-    def validate_films(data):
+    def validate_films(data: Dict[str, Any]) -> List[str]:
+        """
+        Validate data for films
+        """
         errors = []
 
         try:
-            if 100 < len(data.get('film_title', '')) or len(data.get('film_title', '')) < 3:
+            if len(data.get('film_title', '')) > 100 or len(data.get('film_title', '')) < 3:
                 errors.append('Length film title should be between 3 and 100 characters')
             if data.get('film_title', '').isdigit():
                 errors.append('The film title should be string')
@@ -121,7 +168,7 @@ class ValidateSchemas:
                 errors.append('Release data should be more than 1971-01-01')
 
             if re.search('[A-Za-z]', str(data.get('rate', 'F'))) or \
-                    not str(data.get('rate', '')).find('.') != -1:
+                    str(data.get('rate', '')).find('.') == -1:
                 errors.append('The rate should be float')
 
             if data.get('rate', 0) < 0 or data.get('rate', 0) > 10:
@@ -141,7 +188,10 @@ class ValidateSchemas:
         return errors
 
     @classmethod
-    def validate_user(cls, data):
+    def validate_user(cls, data: Dict[str, Any]) -> List[str]:
+        """
+        Validate data for user
+        """
         errors = []
 
         try:

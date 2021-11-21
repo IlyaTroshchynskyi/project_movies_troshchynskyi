@@ -1,4 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+   Collect logic for users
+"""
+
 import logging
+from typing import Dict, List, Tuple, Union
 from flask import request, abort
 from flask_restx import Resource, fields
 from flask_login import current_user, login_user, logout_user
@@ -29,9 +35,12 @@ login_model = api.model('Login', {
 
 @api.route('/registration')
 class UsersApi(Resource):
+    """
+    Shows a list of all users, and lets you POST to add new user
+    """
 
     @api.marshal_with(users_model, code=200)
-    def get(self):
+    def get(self) -> Tuple[Union[List[Users], List], int]:
         """
         Fetch list of users
         """
@@ -41,7 +50,7 @@ class UsersApi(Resource):
 
     @api.expect(users_model)
     @api.marshal_with(users_model, code=201)
-    def post(self):
+    def post(self) -> Tuple[Union[Users, Dict], int]:
         """
         Create a new user
         """
@@ -53,7 +62,7 @@ class UsersApi(Resource):
 
         user = Users.query.filter_by(email=request.json.get("email")).first()
         if user:
-            logger.error(f'User entered existed email')
+            logger.error('User entered existed email')
             return abort(409, f"User with email: {request.json.get('email')} exist")
 
         user = user_schema.load(request.json, session=db.session)
@@ -65,10 +74,12 @@ class UsersApi(Resource):
 
 @api.route('/registration/<email>')
 class UserApi(Resource):
-
+    """
+    Lets you delete or update user
+    """
     @api.expect(users_model)
     @api.marshal_with(users_model, code=200)
-    def put(self, email):
+    def put(self, email: str) -> Tuple[Union[Users, Dict], int]:
         """
         Update user's data
         """
@@ -88,7 +99,7 @@ class UserApi(Resource):
         logger.info(f'User: {current_user} updated {user}')
         return user_schema.dump(user), 200
 
-    def delete(self, email):
+    def delete(self, email: str) -> Tuple[Union[Users, Dict], int]:
         """
         Delete user given its email
         """
@@ -103,9 +114,13 @@ class UserApi(Resource):
 
 @api.route('/login')
 class UserLogin(Resource):
+    """
+    Lets you login to app
+    """
 
     @api.expect(login_model)
-    def post(self):
+    @api.marshal_with(login_model, code=200)
+    def post(self) -> Dict:
         """
         User authorization
         """
@@ -118,13 +133,15 @@ class UserLogin(Resource):
             login_user(user, remember=True)
             logger.info(f"User with email: {request.json.get('email')} is logged in")
             return {"message": f"User with email: {request.json.get('email')} is logged in"}
-        return {"message": f"Wrong credentials"}
+        return {"message": "Wrong credentials"}
 
 
 @api.route('/logout')
-class UserLogin(Resource):
-
-    def get(self):
+class UserLogout(Resource):
+    """
+    Lets you logout from app
+    """
+    def get(self) -> Dict[str, str]:
         """
         Logout from API
         """
