@@ -337,6 +337,9 @@ class FilmApi(Resource):
         if film is None:
             logger.error(f'User: {current_user} entered non-existent film id: {film_id}')
             return abort(404, "Film not found")
+        if not (current_user.is_admin or film.users.email == current_user.email):
+            return abort(403, f"User with email: {current_user.email} is not "
+                              f"admin or did not create this film")
 
         film = films_schema_load.load(parse_films_json(request.json),
                                       instance=film, session=db.session)
@@ -357,6 +360,10 @@ class FilmApi(Resource):
         if film is None:
             logger.error(f'User: {current_user} entered non-existent film id: {film_id}')
             return abort(404, "Film not found")
+
+        if not (current_user.is_admin or film.users.email == current_user.email):
+            return abort(403, f"User with email: {current_user.email} is not "
+                              f"admin or did not create this film")
 
         db.session.delete(film)
         db.session.commit()
