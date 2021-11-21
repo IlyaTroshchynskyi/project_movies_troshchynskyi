@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+   Collect all configuration for project
+"""
+
 import logging
 import logging.handlers
 import os
@@ -11,18 +16,19 @@ def init_logger(name):
     for output to debug.
     """
     logger = logging.getLogger(name)
-    FORMAT = '%(asctime)s - %(name)s:%(lineno)s - %(levelname)s ' \
-             '- FUNCTION=%(funcName)s - %(message)s'
+    logger_format = '%(asctime)s - %(name)s:%(lineno)s - %(levelname)s ' \
+                    '- FUNCTION=%(funcName)s - %(message)s'
     logger.setLevel(logging.INFO)
-    sh = logging.StreamHandler()
-    sh.setFormatter(logging.Formatter(FORMAT, datefmt='%d-%m-%Y %H:%M:%S'))
-    sh.setLevel(logging.INFO)
-    fh = logging.handlers.RotatingFileHandler(filename=os.getcwd() + '/movies/logs/movies.log',
-                                              maxBytes=10*ONE_MB, backupCount=100)
-    fh.setFormatter(logging.Formatter(FORMAT, datefmt='%d-%m-%Y %H:%M:%S'))
-    fh.setLevel(logging.INFO)
-    logger.addHandler(sh)
-    logger.addHandler(fh)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(logging.Formatter(logger_format, datefmt='%d-%m-%Y %H:%M:%S'))
+    stream_handler.setLevel(logging.INFO)
+    file_handler = logging.handlers.RotatingFileHandler(filename=
+                                                        os.getcwd() + '/movies/logs/movies.log',
+                                                        maxBytes=10*ONE_MB, backupCount=100)
+    file_handler.setFormatter(logging.Formatter(logger_format, datefmt='%d-%m-%Y %H:%M:%S'))
+    file_handler.setLevel(logging.INFO)
+    logger.addHandler(stream_handler)
+    logger.addHandler(stream_handler)
 
 
 class Configuration:

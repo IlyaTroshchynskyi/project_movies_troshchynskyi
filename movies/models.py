@@ -1,11 +1,19 @@
+# -*- coding: utf-8 -*-
+"""
+   Collect all model for database
+"""
+
 from werkzeug.security import generate_password_hash
 from flask_login import UserMixin
-from . import login_manager
 from movies import db
+from . import login_manager
 
 
 @login_manager.user_loader
 def load_user(user_id):
+    """
+    Reload the user object from the user ID stored in the session
+    """
     return Users.query.get(int(user_id))
 
 
