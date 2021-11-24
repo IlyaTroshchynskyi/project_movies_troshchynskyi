@@ -36,10 +36,10 @@ class Configuration:
     Configuration for application
     """
 
-    SECRET_KEY = 'secret'
+    SECRET_KEY = os.getenv("SECRET_KEY")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1@localhost:5432/dbname'
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///movies.db'
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///movies.db")
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///movies.db'
     # SQLALCHEMY_ECHO = True
 
 
