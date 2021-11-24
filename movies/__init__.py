@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+   Get access to the application with the config
+"""
+
 import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -8,25 +13,30 @@ from .config import init_logger
 
 
 class MyAnonymousUser(AnonymousUserMixin):
-
+    """
+    Override Anonymous User from flask login to add new attributes
+    """
     def __init__(self):
-        self.email = ''
+        self.email = ""
 
     def __repr__(self):
-        return f'Anonymous user'
+        return "Anonymous user"
 
 
 db = SQLAlchemy()
 migrate = Migrate()
-api = Api(version='1.0', title='Films API', description='A simple Films API',)
+api = Api(version="1.0", title="Films API", description="A simple Films API",)
 login_manager = LoginManager()
 
 login_manager.anonymous_user = MyAnonymousUser
 
 
 def create_app(configuration):
+    """
+    Create and configure an instance of the Flask application.
+    """
 
-    init_logger('movies')
+    init_logger("movies")
     app = Flask(__name__)
     app.config.from_object(configuration)
 
@@ -41,5 +51,5 @@ def create_app(configuration):
     from . import routes
     from . import users
 
-    logger.info('Application movies has created')
+    logger.info("Application movies has created")
     return app
