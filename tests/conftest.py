@@ -9,7 +9,7 @@ from movies.config import TestConfiguration
 from .data import user_1
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="package")
 def app():
     """
     Create and configure a new app instance for each test.
@@ -19,7 +19,7 @@ def app():
     yield app
 
 
-@pytest.fixture(scope="function", name='client')
+@pytest.fixture(scope="function", name="client")
 def client(app):
     """
     A test client for the app.

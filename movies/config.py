@@ -39,7 +39,6 @@ class Configuration:
     SECRET_KEY = os.getenv("SECRET_KEY", "secret")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///movies.db")
-    # SQLALCHEMY_DATABASE_URI = 'sqlite:///movies.db'
     # SQLALCHEMY_ECHO = True
 
 
@@ -49,4 +48,5 @@ class TestConfiguration(Configuration):
     """
 
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:testing.db"
+    # SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:testing.db"
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres_password@test_db:5432/test_movies"

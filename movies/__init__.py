@@ -48,8 +48,7 @@ def create_app(configuration):
     logger = logging.getLogger("movies.__init__")
 
     from . import models
-    from . import routes
-    from . import users
+    from .movies_app import users, directors, genres, films
 
     logger.info("Application movies has created")
     return app

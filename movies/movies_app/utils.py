@@ -4,8 +4,8 @@
 """
 
 from typing import Dict, Any, List, Union
-from . import db
-from .models import Genres, Directors
+from movies import db
+from movies.models import Genres, Directors
 
 
 def parse_films_json(data: Dict[str, Any]) -> Dict[str, Any]:
