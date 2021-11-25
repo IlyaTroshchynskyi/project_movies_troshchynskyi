@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+    Module register cli command
+"""
+
 from flask.cli import FlaskGroup
 from app import app
 from movies import db
@@ -8,6 +13,9 @@ cli = FlaskGroup(app)
 
 @cli.command("create_db")
 def create_db():
+    """
+    Create database tables
+    """
     db.drop_all()
     db.create_all()
     db.session.commit()
@@ -15,6 +23,9 @@ def create_db():
 
 @cli.command("populate_data")
 def insert_data():
+    """
+    Populate db by test data
+    """
     populate_db()
 
 

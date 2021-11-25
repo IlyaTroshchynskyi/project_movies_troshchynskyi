@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+   Test data for tests
+"""
+
+
 genre_1 = {"genre_name": "Боевик"}
 genre_2 = {"genre_name": "Комедия"}
 genre_fail = {"genre_name": ""}
@@ -69,13 +75,13 @@ film_fail = {"film_title": "t",
              "genres": [genre_fail]
              }
 
-film_errors = ['Length film title should be between 3 and 100 characters',
-               'Release data should be more than 1971-01-01',
-               'Rate should be between 0 and 10',
-               'Length should be between 3 and 100 characters',
-               'Length first name should be between 3 and 100 characters',
-               'Length last name should be between 3 and 100 characters',
-               'The age should be more than 17']
+film_errors = ["Length film title should be between 3 and 100 characters",
+               "Release data should be more than 1971-01-01",
+               "Rate should be between 0 and 10",
+               "Length should be between 3 and 100 characters",
+               "Length first name should be between 3 and 100 characters",
+               "Length last name should be between 3 and 100 characters",
+               "The age should be more than 17"]
 
 user_1 = {"first_name": "Ilya",
           "last_name": "Troshchynskyi",
@@ -99,12 +105,13 @@ user_fail = {"first_name": "11",
              "age": 10,
              "email": "test3ail.ru",
              "password": "est",
-             "is_admin": 'r'
+             "is_admin": "r"
              }
 
 
-user_errors = ['Length first name should be between 3 and 100 characters',
-               'The first name should be string',
-               'Length last name should be between 3 and 100 characters',
-               'The age should be more than 11', 'Invalid email',
-               'Make sure your password is at lest 8 letters, has a number in it, has a capital letter in it']
+user_errors = ["Length first name should be between 3 and 100 characters",
+               "The first name should be string",
+               "Length last name should be between 3 and 100 characters",
+               "The age should be more than 11", "Invalid email",
+               "Make sure your password is at lest 8 letters, has a number in it,"
+               " has a capital letter in it"]

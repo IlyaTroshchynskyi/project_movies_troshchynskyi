@@ -13,27 +13,27 @@ from . import api, db
 from .schemas import UserSchema, ValidateSchemas
 from .models import Users
 
-logger = logging.getLogger('movies.users')
+logger = logging.getLogger("movies.users")
 
 user_schema = UserSchema()
 
-users_model = api.model('Users', {
-    'user_id': fields.Integer(readonly=True),
-    'first_name': fields.String(required=True),
-    'last_name': fields.String(required=True),
-    'age': fields.Integer(required=True),
-    'email': fields.String(required=True),
-    'password': fields.String(required=True),
-    'is_admin': fields.Boolean(required=True),
+users_model = api.model("Users", {
+    "user_id": fields.Integer(readonly=True),
+    "first_name": fields.String(required=True),
+    "last_name": fields.String(required=True),
+    "age": fields.Integer(required=True),
+    "email": fields.String(required=True),
+    "password": fields.String(required=True),
+    "is_admin": fields.Boolean(required=True),
 })
 
-login_model = api.model('Login', {
-    'email': fields.String(required=True),
-    'password': fields.String(required=True)
+login_model = api.model("Login", {
+    "email": fields.String(required=True),
+    "password": fields.String(required=True)
 })
 
 
-@api.route('/registration')
+@api.route("/registration")
 class UsersApi(Resource):
     """
     Shows a list of all users, and lets you POST to add new user
@@ -49,7 +49,7 @@ class UsersApi(Resource):
         if not current_user.is_admin:
             return abort(403, f"User with email: {current_user.email} is not admin")
         users = Users.query.all()
-        logger.info(f'User: {current_user} fetched all users: {users}')
+        logger.info(f"User: {current_user} fetched all users: {users}")
         return user_schema.dump(users, many=True)
 
     @api.expect(users_model)
@@ -61,22 +61,22 @@ class UsersApi(Resource):
 
         errors = ValidateSchemas.validate_user(request.json)
         if errors:
-            logger.error(f'User: {current_user} entered wrong data {errors} for updating genre')
-            return abort(400, {'errors': errors})
+            logger.error(f"User: {current_user} entered wrong data {errors} for updating genre")
+            return abort(400, {"errors": errors})
 
         user = Users.query.filter_by(email=request.json.get("email")).first()
         if user:
-            logger.error('User entered existed email')
+            logger.error("User entered existed email")
             return abort(409, f"User with email: {request.json.get('email')} exist")
 
         user = user_schema.load(request.json, session=db.session)
         db.session.add(user)
         db.session.commit()
-        logger.info(f'User has created new user: {user}')
+        logger.info(f"User has created new user: {user}")
         return user_schema.dump(user), 201
 
 
-@api.route('/registration/<email>')
+@api.route("/registration/<email>")
 class UserApi(Resource):
     """
     Lets you delete or update user
@@ -86,7 +86,7 @@ class UserApi(Resource):
     @login_required
     def put(self, email: str) -> Tuple[Union[Users, Dict], int]:
         """
-        Update user's data
+        Update user"s data
         """
         if not (current_user.is_admin or current_user.email == email):
             return abort(403, f"User with email: {current_user.email} is not admin or "
@@ -94,15 +94,15 @@ class UserApi(Resource):
 
         errors = ValidateSchemas.validate_user(request.json)
         if errors:
-            logger.error(f'User: {current_user} entered wrong data {errors} for updating user')
-            return abort(400, {'errors': errors})
+            logger.error(f"User: {current_user} entered wrong data {errors} for updating user")
+            return abort(400, {"errors": errors})
 
         user = Users.query.filter_by(email=email).first()
 
         user = user_schema.load(request.json, instance=user, session=db.session)
         db.session.add(user)
         db.session.commit()
-        logger.info(f'User: {current_user} updated {user}')
+        logger.info(f"User: {current_user} updated {user}")
         return user_schema.dump(user), 200
 
     @login_required
@@ -117,11 +117,11 @@ class UserApi(Resource):
             return abort(404, f"User with email: {email} not found")
         db.session.delete(user)
         db.session.commit()
-        logger.info(f'User: {current_user} deleted {user}')
+        logger.info(f"User: {current_user} deleted {user}")
         return {}, 204
 
 
-@api.route('/login')
+@api.route("/login")
 class UserLogin(Resource):
     """
     Lets you login to app
@@ -136,15 +136,15 @@ class UserLogin(Resource):
         if current_user.is_authenticated:
             return {"message": f"User with email: {request.json.get('email')} has been auth"}
 
-        user = Users.query.filter_by(email=request.json.get('email')).first()
-        if user and check_password_hash(user.password, request.json.get('password')):
+        user = Users.query.filter_by(email=request.json.get("email")).first()
+        if user and check_password_hash(user.password, request.json.get("password")):
             login_user(user, remember=True)
             logger.info(f"User with email: {request.json.get('email')} is logged in")
             return {"message": f"User with email: {request.json.get('email')} is logged in"}
         return {"message": "Wrong credentials"}
 
 
-@api.route('/logout')
+@api.route("/logout")
 class UserLogout(Resource):
     """
     Lets you logout from app
@@ -154,5 +154,5 @@ class UserLogout(Resource):
         Logout from API
         """
         logout_user()
-        logger.info('Current user is logged out')
+        logger.info("Current user is logged out")
         return {"message": "Current user is logged out"}

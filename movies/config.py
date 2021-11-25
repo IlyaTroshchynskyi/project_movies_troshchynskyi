@@ -16,16 +16,16 @@ def init_logger(name):
     for output to debug.
     """
     logger = logging.getLogger(name)
-    logger_format = '%(asctime)s - %(name)s:%(lineno)s - %(levelname)s ' \
-                    '- FUNCTION=%(funcName)s - %(message)s'
+    logger_format = "%(asctime)s - %(name)s:%(lineno)s - %(levelname)s - " \
+                    "FUNCTION=%(funcName)s - %(message)s"
     logger.setLevel(logging.INFO)
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(logging.Formatter(logger_format, datefmt='%d-%m-%Y %H:%M:%S'))
     stream_handler.setLevel(logging.INFO)
     file_handler = logging.handlers.RotatingFileHandler(filename=
-                                                        os.getcwd() + '/movies/logs/movies.log',
+                                                        os.getcwd() + "/movies/logs/movies.log",
                                                         maxBytes=10*ONE_MB, backupCount=100)
-    file_handler.setFormatter(logging.Formatter(logger_format, datefmt='%d-%m-%Y %H:%M:%S'))
+    file_handler.setFormatter(logging.Formatter(logger_format, datefmt="%d-%m-%Y %H:%M:%S"))
     file_handler.setLevel(logging.INFO)
     logger.addHandler(stream_handler)
     logger.addHandler(stream_handler)
@@ -36,7 +36,7 @@ class Configuration:
     Configuration for application
     """
 
-    SECRET_KEY = os.getenv("SECRET_KEY")
+    SECRET_KEY = os.getenv("SECRET_KEY", "secret")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///movies.db")
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///movies.db'
@@ -49,4 +49,4 @@ class TestConfiguration(Configuration):
     """
 
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:testing.db'
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:testing.db"
