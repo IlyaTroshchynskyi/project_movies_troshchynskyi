@@ -1,6 +1,5 @@
 .idea
 __pycache__/
-migrations
 movies/movies.db
 movies/logs/movies.log
 .pytest_cache

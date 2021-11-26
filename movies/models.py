@@ -26,9 +26,7 @@ films_genres = db.Table("films_genres",
 films_directors = db.Table("films_directors",
                            db.Column("film_id", db.Integer, db.ForeignKey("films.film_id"),
                                      primary_key=True),
-                           db.Column("director_id", db.Integer,
-                                     db.ForeignKey("directors.director_id",
-                                                   ondelete="SET DEFAULT"), default="unknown",
+                           db.Column("director_id", db.Integer, db.ForeignKey("directors.director_id"),
                                      primary_key=True))
 
 
