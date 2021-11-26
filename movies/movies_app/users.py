@@ -9,11 +9,11 @@ from flask import request, abort
 from flask_restx import Resource, fields
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import check_password_hash
-from . import api, db
-from .schemas import UserSchema, ValidateSchemas
-from .models import Users
+from movies import api, db
+from movies.schemas import UserSchema, ValidateSchemas
+from movies.models import Users
 
-logger = logging.getLogger("movies.users")
+logger = logging.getLogger("movies.movies_app.users")
 
 user_schema = UserSchema()
 
