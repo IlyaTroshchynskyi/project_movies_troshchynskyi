@@ -1,1 +1,8 @@
 .idea
+__pycache__/
+movies/movies.db
+movies/logs/movies.log
+.pytest_cache
+movies/:memory:testing.db
+requirements.txt
+.env.dev

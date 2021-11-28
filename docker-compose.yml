@@ -1,0 +1,47 @@
+version: "3.3"
+
+services:
+  postgres_db:
+    image: postgres:13.2
+    restart: always
+    env_file:
+      - .env.dev
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  movies:
+    build: .
+    restart: on-failure
+    env_file:
+      - .env.dev
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres_db
+
+  nginx:
+    build: ./nginx
+    depends_on:
+      - movies
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+
+  test_db:
+    image: postgres:13.2
+    restart: always
+    environment:
+      POSTGRES_DB: test_movies
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+    volumes:
+      - db-data-test:/var/lib/postgresql/data_test
+    ports:
+      - "5434:5432"
+
+volumes:
+  db-data:
+  db-data-test:
